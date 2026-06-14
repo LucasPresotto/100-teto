@@ -41,13 +41,9 @@ class Usuario(Base):
     email: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
     senha_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     telefone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
-    tipo_perfil: Mapped[str] = mapped_column(String(20), default="locatario")
-    perfil_verificado: Mapped[bool] = mapped_column(Boolean, default=False)
+    cpf: Mapped[Optional[str]] = mapped_column(String(14), unique=True, nullable=True)
     data_criacao: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    __table_args__ = (
-        CheckConstraint(tipo_perfil.in_(["locador", "locatario", "ambos"]), name="check_tipo_perfil"),
-    )
 
     imoveis_anunciados: Mapped[List["Imovel"]] = relationship(back_populates="locador", cascade="all, delete-orphan")
     imoveis_favoritos: Mapped[List["Imovel"]] = relationship(secondary=favoritos, back_populates="favoritado_por")

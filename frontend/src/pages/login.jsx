@@ -1,8 +1,9 @@
 import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import logo from "../imagens/Logo100TETO.png"
+import logo from "../imagens/Logo100TETO.png";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { login } from "../Services/Api.js";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,19 +16,32 @@ export default function Login() {
     setErro("");
 
     try {
-      const res = await login(email, senha);
+      const usuario = await login(
+        email,
+        senha
+      );
 
-      navigate("/paginaInicial");
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+
+      navigate("/telaInicial");
 
     } catch (err) {
-      setErro("Email ou senha incorretos");
+      setErro(err.message);
       if (senha.length < 6) setErro("A senha deve ter 6 digitos!!");
       console.error(err);
     }
   }
 
   return (
-    <div className="container-fluid vh-100 d-flex justify-content-center align-items-center bg-light">
+
+
+    <div className="container-fluid min-vh-100 d-flex justify-content-center align-items-center p-0"
+      style={{
+        backgroundColor: '#11998e',
+        backgroundImage: 'linear-gradient(to right, #a6ccf8, #ffffff, #a6ccf8)',
+        overflowX: 'hidden'
+      }}
+    >
       <div
         className="card shadow p-4"
         style={{ width: "100%", maxWidth: "400px" }}

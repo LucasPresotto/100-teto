@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-//substituir pela senha do postgre
+#substituir pela senha do postgre
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres:senha_postgre@localhost:5432/100_teto_db"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
