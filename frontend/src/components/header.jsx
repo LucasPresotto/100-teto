@@ -20,7 +20,7 @@ export default function Header() {
                             fontFamily: 'Roboto, sans-serif',
                             fontWeight: '700'
                         }}>100TETO</h2>
-                </a>
+                </a>    
 
                 <button
                     className="navbar-toggler"
@@ -37,19 +37,18 @@ export default function Header() {
                             <Link className="nav-link text-white" to="/telaInicial">Inicio</Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link text-white" to="/telaCadastroImovel">Minha Conta</Link>
+                            <Link className="nav-link text-white" to="/telaCadastroImovel">Minhas Solicitações</Link>
                         </li>
+                        <form className="d-flex mt-2 mt-lg-0" role="search" style={{ maxWidth: '300px', width: '100%' }}>
+                            <input className="form-control me-2 bg-dark text-white" type="search" placeholder="Buscar..." aria-label="Search" />
+                            <button className="btn btn-outline-light" type="submit">Pesquisar</button>
+                        </form>
                         <li className="nav-item">
-                            <Link className="nav-link text-white" to="/telaCadastroImovel">Logout</Link>
-
-
+                            <Link className="nav-link text-white" to="/">Logout</Link>
                         </li>
                     </ul>
                 </div>
-                <form className="d-flex mt-2 mt-lg-0" role="search" style={{ maxWidth: '300px', width: '100%' }}>
-                    <input className="form-control me-2 bg-dark text-white" type="search" placeholder="Buscar..." aria-label="Search" />
-                    <button className="btn btn-outline-light" type="submit">Pesquisar</button>
-                </form>
+
 
             </div>
         </nav >
