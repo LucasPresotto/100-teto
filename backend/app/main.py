@@ -1,4 +1,4 @@
-from fastapi import FastAPI , Depends, HTTPException
+from fastapi import FastAPI , Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app.database import engine
@@ -8,7 +8,8 @@ from app.models.db_model import Usuario
 from app.schemas import UsuarioCadastro
 from app.security import gerar_hash
 from app.schemas import UsuarioLogin
-from app.security import verificar_senha
+from app.security import verificar_senha, criar_token_acesso, verificar_token_acesso
+from fastapi.security import OAuth2PasswordBearer
 
 Base.metadata.create_all(bind=engine)
 
@@ -60,6 +61,7 @@ def cadastrar_usuario(
             }
     }
 
+auth_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 @app.post("/login")
 def login(
@@ -69,9 +71,22 @@ def login(
     usuario = db.query(Usuario).filter(Usuario.email == dados.email).first()
     
     if not usuario:
-        raise HTTPException(status_code=400, detail="Email ou senha incorretos")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email ou senha incorretos")
     
     if not verificar_senha(dados.senha, usuario.senha_hash):
-        raise HTTPException(status_code=400, detail="Email ou senha incorretos")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email ou senha incorretos")
     
-    return {"mensagem": "Login realizado com sucesso!"}
+    token_acesso = criar_token_acesso({"sub": str(usuario.id), "email": usuario.email})
+
+    return {
+        "access_token": token_acesso,
+        "token_type": "bearer",
+        "usuario": {"id": usuario.id, "nome": usuario.nome}
+        }
+
+def usuario_autenticado(token: str = Depends(auth_scheme)):
+    payload = verificar_token_acesso(token)
+    if not payload:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token de acesso inválido")
+    
+    return payload
