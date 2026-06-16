@@ -21,8 +21,6 @@ export default function Login() {
         senha
       );
 
-      localStorage.setItem("usuario", JSON.stringify(usuario));
-
       navigate("/telaInicial");
 
     } catch (err) {

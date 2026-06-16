@@ -14,11 +14,15 @@ export async function login(email, senha) {
         }
     );
 
-    if (!response.ok) {
+    if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("usuario_id", data.usuario.id);
+        return data;
+    } else{
         const erro = await response.json();
         throw new Error(erro.detail);
     }
 
-    return response.json();
 }
 
