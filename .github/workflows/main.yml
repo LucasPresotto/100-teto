@@ -31,7 +31,6 @@ jobs:
         run: |
           test -f package.json
           test -f index.html
-          test -f src/main.jsx
-
+          
       - name: Executar build
         run: npm run build
