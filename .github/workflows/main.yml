@@ -25,7 +25,8 @@ jobs:
 
       - name: Instalar dependências
         run: npm install
-
+        working-directory: frontend
+        
       - name: Verificar arquivos obrigatórios
         run: |
           test -f package.json
