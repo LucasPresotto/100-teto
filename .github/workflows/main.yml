@@ -33,4 +33,4 @@ jobs:
           test -f src/main.jsx
 
       - name: Executar build
-        run: npm run dev
+        run: npm run build
