@@ -26,3 +26,29 @@ export async function login(email, senha) {
 
 }
 
+export async function listarImoveis() {
+
+    const response = await fetch(
+        "http://localhost:8000/imoveis"
+    );
+
+    if (!response.ok) {
+        throw new Error("Erro ao carregar imóveis");
+    }
+
+    return response.json();
+}
+
+export async function buscarImovel(id) {
+
+    const response = await fetch(
+        `http://localhost:8000/imoveis/${id}`
+    );
+
+    if (!response.ok) {
+        throw new Error("Erro ao buscar imóvel");
+    }
+
+    return response.json();
+}
+
