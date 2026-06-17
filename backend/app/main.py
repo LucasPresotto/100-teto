@@ -4,10 +4,10 @@ from sqlalchemy.orm import Session
 from app.database import engine
 from app.models.db_model import Base
 from app.database import get_db
-from app.models.db_model import Usuario
+from app.models.db_model import Usuario, Imovel
 from app.schemas import UsuarioCadastro
 from app.security import gerar_hash
-from app.schemas import UsuarioLogin
+from app.schemas import UsuarioLogin, ImovelCadastro
 from app.security import verificar_senha, criar_token_acesso, verificar_token_acesso
 from fastapi.security import OAuth2PasswordBearer
 
@@ -90,3 +90,25 @@ def usuario_autenticado(token: str = Depends(auth_scheme)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token de acesso inválido")
     
     return payload
+
+@app.post("/imoveis")
+def cadastrar_imovel(
+    dados: ImovelCadastro, db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)
+):
+    id_usuario = usuario.get("sub")
+
+    novo_imovel = Imovel(
+        locador_id=id_usuario,
+        titulo=dados.titulo,
+        descricao=dados.descricao,
+        tipo=dados.tipo,
+        preco_aluguel=dados.preco_aluguel,
+        cep=dados.cep,
+        cidade=dados.cidade
+    )
+
+    db.add(novo_imovel)
+    db.commit()
+    db.refresh(novo_imovel)
+
+    return {"mensagem": "Imóvel cadastrado com sucesso", "imovel_id": novo_imovel.id}

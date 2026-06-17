@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 class UsuarioLogin(BaseModel):
     email: EmailStr
@@ -10,3 +11,11 @@ class UsuarioCadastro(BaseModel):
     cpf: str
     email: EmailStr
     senha: str
+
+class ImovelCadastro(BaseModel):
+    titulo: str
+    descricao: Optional[str] = None
+    tipo: str
+    preco_aluguel: float
+    cep: str
+    cidade: str
