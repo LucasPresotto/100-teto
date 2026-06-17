@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app.database import engine
 from app.models.db_model import Base
+from app.models.db_model import Imovel
 from app.database import get_db
 from app.models.db_model import Usuario, Imovel
 from app.schemas import UsuarioCadastro
@@ -91,6 +92,7 @@ def usuario_autenticado(token: str = Depends(auth_scheme)):
     
     return payload
 
+<<<<<<< HEAD
 @app.post("/imoveis")
 def cadastrar_imovel(
     dados: ImovelCadastro, db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)
@@ -112,3 +114,22 @@ def cadastrar_imovel(
     db.refresh(novo_imovel)
 
     return {"mensagem": "Imóvel cadastrado com sucesso", "imovel_id": novo_imovel.id}
+=======
+@app.get("/imoveis")
+def listar_imoveis(db: Session = Depends(get_db)):
+
+    imoveis = db.query(Imovel).all()
+
+    return imoveis
+
+@app.get("/imoveis/{id}")
+def obter_imovel(id: str, db: Session = Depends(get_db)):
+
+    imovel = (
+        db.query(Imovel)
+        .filter(Imovel.id == id)
+        .first()
+    )
+
+    return imovel
+>>>>>>> 4304cde (feat: Adicionando telas telaListarImoveis e telaDetalheImovel, criação do componente cardImovel.jsx, para facilitar a vizualização de imoveis cadastrados, e em caso de refatoração, tornar mais fácil. Adicionando também, rotas no backend para listar os imoveis existentes e disponiveis)

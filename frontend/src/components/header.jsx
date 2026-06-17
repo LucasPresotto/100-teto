@@ -39,10 +39,6 @@ export default function Header() {
                         <li className="nav-item">
                             <Link className="nav-link text-white" to="/telaCadastroImovel">Minhas Solicitações</Link>
                         </li>
-                        <form className="d-flex mt-2 mt-lg-0" role="search" style={{ maxWidth: '300px', width: '100%' }}>
-                            <input className="form-control me-2 bg-dark text-white" type="search" placeholder="Buscar..." aria-label="Search" />
-                            <button className="btn btn-outline-light" type="submit">Pesquisar</button>
-                        </form>
                         <li className="nav-item">
                             <Link className="nav-link text-white" to="/">Logout</Link>
                         </li>

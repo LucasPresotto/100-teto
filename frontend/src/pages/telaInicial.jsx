@@ -16,22 +16,6 @@ export default function telaInicial() {
             100% { background-position: 0% 50%; }} 
         `;
 
-
-    async function handleTelaCadastro(e) {
-        e.preventDefault();
-        setErro("");
-
-        try {
-            //const res = await Cadastrar(nome, sobrenome, cpf, dataNascimento, email, senha);
-
-            navigate("/telaCadastroImovel");
-
-        } catch (err) {
-            setErro("Dados inseridos incorretamente");
-            console.error(err);
-        }
-    }
-
     return (
         <Layout>
             <style>{animacaoTitulo}</style>
@@ -60,8 +44,8 @@ export default function telaInicial() {
                         Bem-vindo ao 100TETO
                     </h1>
                     <p className="mb-4" style={{ color: '#05172c', fontFamily: 'Roboto, sans-serif', fontSize: '18px' }}>Aqui você pode encontrar o imóvel ideal para chamar de lar. Explore nossas opções e faça parte da nossa comunidade!</p>
-                    <button className="btn btn-primary btn-lg me-2" onClick={handleTelaCadastro} style={{ backgroundColor: '#05172c', borderColor: '#05172c' }}>Explorar Imóveis</button>
-                    <button className="btn btn-primary btn-lg me-2" onClick={handleTelaCadastro} style={{ backgroundColor: '#05172c', borderColor: '#05172c' }}>Cadastrar Imóvel</button>
+                    <button className="btn btn-primary btn-lg me-2" onClick={navigate.bind(null, "/telaListarImoveis")} style={{ backgroundColor: '#05172c', borderColor: '#05172c' }}>Explorar Imóveis</button>
+                    <button className="btn btn-primary btn-lg me-2" onClick={navigate.bind(null, "/telaCadastroImovel")} style={{ backgroundColor: '#05172c', borderColor: '#05172c' }}>Cadastrar Imóvel</button>
                 </div>
             </div>
         </Layout >
