@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
+import Layout from "../components/layout";
 
 export default function CadastroImovel() {
   const navigate = useNavigate();
@@ -65,6 +66,7 @@ export default function CadastroImovel() {
   };
 
   return (
+    <Layout>
     <div 
       className="container-fluid min-vh-100 d-flex justify-content-center align-items-center p-4"
       style={{
@@ -183,5 +185,6 @@ export default function CadastroImovel() {
         </form>
       </div>
     </div>
+    </Layout>
   );
 }

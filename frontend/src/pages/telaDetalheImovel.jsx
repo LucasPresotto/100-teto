@@ -37,33 +37,35 @@ export default function TelaDetalhesImovel() {
     return (
         <Layout>
 
-            <div className="container-fluid vh-100"
+            <div className="container-fluid vh-100 d-flex justify-content-center align-items-center bg-light"
 
                 style={{
-                    backgroundColor: '#c4d3fd',
+                    backgroundColor: '#11998e',
+                    backgroundImage: 'linear-gradient(to right, #a6ccf8, #ffffff, #a6ccf8)',
                     overflowX: 'hidden'
                 }}
 
             >
-                <h1>{imoveis.titulo}</h1>
-                <p className="text-muted">
-                    {imoveis.cidade}
-                </p>
+                <div className="card shadow p-4" style={{ width: "100%", maxWidth: "600px" }}>
+                    <h1>{imoveis.titulo}</h1>
+                    <p className="text-muted">
+                        {imoveis.cidade}
+                    </p>
 
-                <h3>
-                    R${imoveis.preco_aluguel} 
-                </h3>
+                    <h3>
+                        R${imoveis.preco_aluguel}
+                    </h3>
 
-                <p>
-                    {imoveis.descricao}
-                </p>
+                    <p>
+                        {imoveis.descricao}
+                    </p>
 
-                <ul>
-                    <li>Quartos: {imoveis.quartos}</li>
-                    <li>Banheiros: {imoveis.banheiros}</li>
-                    <li>Área: {imoveis.area_m2} m²</li>
-                </ul>
-
+                    <ul>
+                        <li>Quartos: {imoveis.quartos}</li>
+                        <li>Banheiros: {imoveis.banheiros}</li>
+                        <li>Área: {imoveis.area_m2} m²</li>
+                    </ul>
+                </div>
             </div>
 
         </Layout>
