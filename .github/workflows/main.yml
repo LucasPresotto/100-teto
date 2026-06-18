@@ -35,4 +35,4 @@ jobs:
           
       - name: Executar build
         run: npm run build
-      working-directory: frontend
+        working-directory: frontend
