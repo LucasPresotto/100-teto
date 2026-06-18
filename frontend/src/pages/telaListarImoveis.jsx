@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/layout";
 import CardImovel from "../components/cardImovel";
-import { listarImoveis } from "../services/Api";
+import { listarImoveis } from "../Services/Api";
 import { useNavigate } from "react-router-dom";
 
 export default function TelaListarImoveis() {
