@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 
 class UsuarioLogin(BaseModel):
     email: EmailStr
@@ -17,5 +17,11 @@ class ImovelCadastro(BaseModel):
     descricao: Optional[str] = None
     tipo: str
     preco_aluguel: float
+    area_m2: Optional[int] = None
+    quartos: int = 0
+    banheiros: int = 0
     cep: str
     cidade: str
+
+comodidades_ids: List[int] = []
+fotos: List[str] = []
