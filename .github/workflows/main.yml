@@ -31,6 +31,8 @@ jobs:
         run: |
           test -f package.json
           test -f index.html
+        working-directory: frontend  
           
       - name: Executar build
         run: npm run build
+      working-directory: frontend
