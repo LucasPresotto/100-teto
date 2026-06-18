@@ -2,7 +2,7 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../imagens/Logo100TETO.png"
 import { useNavigate } from "react-router-dom";
-import { cadastrarUsuario } from "../services/Cadastrar.js";
+import { cadastrarUsuario } from "../Services/Cadastrar.js";
 
 export default function Cadastrar() {
     const [nome, setNome] = useState("");

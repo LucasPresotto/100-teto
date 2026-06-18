@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../imagens/Logo100TETO.png";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { login } from "../services/Api.js";
+import { login } from "../Services/Api.js";
 
 export default function Login() {
   const [email, setEmail] = useState("");

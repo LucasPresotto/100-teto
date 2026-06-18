@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/layout";
 import CardImovel from "../components/cardImovel";
-import { listarImoveis } from "../services/Api";
+import { listarImoveis } from "../Services/Api";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { buscarImovel } from "../services/Api";
+import { buscarImovel } from "../Services/Api";
 export default function TelaDetalhesImovel() {
 
     const navigate = useNavigate();
