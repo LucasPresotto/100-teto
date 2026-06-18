@@ -1,22 +1,31 @@
-from fastapi import FastAPI , Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, Header, status, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.database import engine
 from app.models.db_model import Base
 from app.models.db_model import Imovel
 from app.database import get_db
-from app.models.db_model import Usuario, Imovel
+from app.models.db_model import Usuario, Imovel, Comodidade, FotoImovel
 from app.schemas import UsuarioCadastro
 from app.security import gerar_hash
 from app.schemas import UsuarioLogin, ImovelCadastro
 from app.security import verificar_senha, criar_token_acesso, verificar_token_acesso
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.staticfiles import StaticFiles
+import os
+import shutil
+import json
 
 Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI(
     title="API 100teto",
 )
+
+
+os.makedirs("uploads", exist_ok=True)
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 origins = [
     "http://localhost:5173", 
@@ -77,57 +86,123 @@ def login(
     if not verificar_senha(dados.senha, usuario.senha_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email ou senha incorretos")
     
-    token_acesso = criar_token_acesso({"sub": str(usuario.id), "email": usuario.email})
 
     return {
-        "access_token": token_acesso,
-        "token_type": "bearer",
-        "usuario": {"id": usuario.id, "nome": usuario.nome}
+        "mensagem": "Login realizado com sucesso!",
+        "access_token": str(usuario.id), 
+        "usuario": {
+            "id": str(usuario.id),
+            "nome": usuario.nome
+        }
         }
 
-def usuario_autenticado(token: str = Depends(auth_scheme)):
-    payload = verificar_token_acesso(token)
-    if not payload:
+def usuario_autenticado(authorization: str = Header(None)):
+    if not authorization:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token de acesso inválido")
     
-    return payload
+    usuario_id = authorization.replace("Bearer ", "").strip()
+    
+    if not usuario_id:
+         raise HTTPException(status_code=401, detail="Token de acesso inválido")
+         
+    return {"sub": usuario_id}
+
+@app.get("/comodidades")
+def listar_comodidades(db: Session = Depends(get_db)):
+    comodidades = db.query(Comodidade).all()
+
+    if not comodidades:
+        basicas = ["Wi-Fi", "Mobiliado", "Garagem", "Ar Condicionado", "Piscina", "Permite Pets", "Churrasqueira", "Varanda"]
+        for nome in basicas:
+            db.add(Comodidade(nome=nome))
+        db.commit()
+        comodidades = db.query(Comodidade).all()
+    
+    return comodidades
 
 @app.post("/imoveis")
 def cadastrar_imovel(
-    dados: ImovelCadastro, db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)
+    titulo: str = Form(...),
+    tipo: str = Form(...),
+    preco_aluguel: float = Form(...),
+    area_m2: int = Form(None),
+    quartos: int = Form(0),
+    banheiros: int = Form(0),
+    cep: str = Form(...),
+    cidade: str = Form(...),
+    descricao: str = Form(None),
+    comodidades: str = Form("[]"), 
+    fotos: list[UploadFile] = File(default=[]), 
+    
+    db: Session = Depends(get_db),
+    usuario: dict = Depends(usuario_autenticado)
 ):
     id_usuario = usuario.get("sub")
 
-    novo_imovel = Imovel(
-        locador_id=id_usuario,
-        titulo=dados.titulo,
-        descricao=dados.descricao,
-        tipo=dados.tipo,
-        preco_aluguel=dados.preco_aluguel,
-        cep=dados.cep,
-        cidade=dados.cidade
-    )
+    try:
+        novo_imovel = Imovel(
+            locador_id=id_usuario,
+            titulo=titulo,
+            tipo=tipo,
+            preco_aluguel=preco_aluguel,
+            area_m2=area_m2,
+            quartos=quartos,
+            banheiros=banheiros,
+            cep=cep,
+            cidade=cidade,
+            descricao=descricao
+        )
 
-    db.add(novo_imovel)
-    db.commit()
-    db.refresh(novo_imovel)
+        ids_comodidades = json.loads(comodidades)
+        if ids_comodidades:
+            comodidades_db = db.query(Comodidade).filter(Comodidade.id.in_(ids_comodidades)).all()
+            novo_imovel.comodidades = comodidades_db
 
-    return {"mensagem": "Imóvel cadastrado com sucesso", "imovel_id": novo_imovel.id}
+        db.add(novo_imovel)
+        db.commit()
+        db.refresh(novo_imovel)
+
+        if fotos and fotos[0].filename:
+            for index, foto in enumerate(fotos):
+                extensao = foto.filename.split(".")[-1]
+                nome_arquivo = f"{novo_imovel.id}_{index}.{extensao}"
+                caminho_arquivo = os.path.join("uploads", nome_arquivo)
+                
+                with open(caminho_arquivo, "wb") as buffer:
+                    shutil.copyfileobj(foto.file, buffer)
+                
+                url_imagem = f"http://localhost:8000/static/{nome_arquivo}"
+                nova_foto = FotoImovel(
+                    imovel_id=novo_imovel.id, 
+                    url_imagem=url_imagem,
+                    is_principal=(index == 0) 
+                )
+                db.add(nova_foto)
+            db.commit()
+
+        return {"mensagem": "Imóvel e fotos cadastrados com sucesso!"}
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Erro ao salvar: {str(e)}")
+
 
 @app.get("/imoveis")
 def listar_imoveis(db: Session = Depends(get_db)):
 
-    imoveis = db.query(Imovel).all()
+    imoveis = db.query(Imovel).options(joinedload(Imovel.fotos)).all()
 
     return imoveis
 
-@app.get("/imoveis/{id}")
-def obter_imovel(id: str, db: Session = Depends(get_db)):
+@app.get("/imoveis/{imovel_id}")
+def obter_imovel(imovel_id: str, db: Session = Depends(get_db)):
 
-    imovel = (
-        db.query(Imovel)
-        .filter(Imovel.id == id)
-        .first()
-    )
+    imovel = db.query(Imovel).options(
+        joinedload(Imovel.fotos),
+        joinedload(Imovel.comodidades)
+    ).filter(Imovel.id == imovel_id).first()
+
+    if not imovel:
+        raise HTTPException(status_code=404, detail="Imóvel não encontrado")
 
     return imovel
