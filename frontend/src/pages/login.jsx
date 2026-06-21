@@ -42,7 +42,7 @@ export default function Login() {
     >
       <div
         className="card shadow p-4"
-        style={{ width: "100%", maxWidth: "400px" }}
+        style={{ marginTop: "20px", width: "100%", maxWidth: "400px" }}
       >
         <img
           src={logo}
@@ -51,6 +51,14 @@ export default function Login() {
           style={{ width: "300px" }}
         />
         <h2 className="text-center mb-4">Login</h2>
+
+        {erro && (
+          <div className="container mt-5">
+            <div className="alert alert-danger" role="alert">
+              {erro}
+            </div>
+          </div>
+        )}
 
 
         <form>

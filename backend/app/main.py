@@ -5,7 +5,7 @@ from app.database import engine
 from app.models.db_model import Base
 from app.models.db_model import Imovel
 from app.database import get_db
-from app.models.db_model import Usuario, Imovel, Comodidade, FotoImovel
+from app.models.db_model import Usuario, Imovel, Comodidade, FotoImovel, solicitacoes
 from app.schemas import UsuarioCadastro
 from app.security import gerar_hash
 from app.schemas import UsuarioLogin, ImovelCadastro
@@ -206,3 +206,48 @@ def obter_imovel(imovel_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Imóvel não encontrado")
 
     return imovel
+
+
+@app.post("/imoveis/{imovel_id}/solicitar")
+def solicitar_imovel(imovel_id: str, db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)):
+    print(usuario)
+    print(type(usuario))
+    imovel = db.query(Imovel).filter(Imovel.id == imovel_id).first()
+    solicitacao_existente = db.query(solicitacoes).filter(solicitacoes.imovel_id == imovel_id, solicitacoes.usuario_id == usuario["sub"]).first()
+    nova_solicitacao = solicitacoes( usuario_id=usuario["sub"], imovel_id=imovel_id, status = True)
+    print("Solicitação existente:", solicitacao_existente)
+    if solicitacao_existente:
+        raise HTTPException(status_code=400, detail="Você já solicitou este imóvel")
+    
+    
+    if not imovel:
+        raise HTTPException(status_code=404, detail="Imóvel não encontrado")
+
+    if imovel.solicitado:
+        raise HTTPException(status_code=400, detail="Imóvel já solicitado")
+
+    imovel.solicitado = True    
+    db.add(nova_solicitacao)
+    db.commit()
+    db.refresh(nova_solicitacao)
+    db.refresh(imovel)
+    return {"mensagem": "Imóvel solicitado com sucesso!"}
+
+@app.get("/solicitacoes")
+def listar_solicitacoes(db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)):
+    solicitacoes_usuario = db.query(solicitacoes).filter(solicitacoes.usuario_id == usuario["sub"]).all()
+    return [{
+            "id": s.imovel.id,
+            "titulo": s.imovel.titulo,
+            "descricao": s.imovel.descricao,
+            "preco_aluguel": s.imovel.preco_aluguel,
+            "cidade": s.imovel.cidade,
+            "fotos": s.imovel.fotos,
+        }
+        for s in solicitacoes_usuario
+    ]
+    
+@app.get("/meusImoveis/{id}")    
+def listar_meus_imoveis(id: str, db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)):
+    imoveis_usuario = db.query(Imovel).options(joinedload(Imovel.fotos)).filter(Imovel.locador_id == usuario["sub"]).all()
+    return imoveis_usuario

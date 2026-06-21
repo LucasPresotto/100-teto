@@ -64,7 +64,8 @@ class Imovel(Base):
     cep: Mapped[str] = mapped_column(String(10), nullable=False)
     cidade: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(20), default="ativo") # ativo, pausado
-
+    solicitado: Mapped[bool] = mapped_column(Boolean, default=False)
+    
     locador: Mapped["Usuario"] = relationship(back_populates="imoveis_anunciados")
     fotos: Mapped[List["FotoImovel"]] = relationship(back_populates="imovel", cascade="all, delete-orphan")
     comodidades: Mapped[List["Comodidade"]] = relationship(secondary=imovel_comodidades, back_populates="imoveis")
@@ -90,3 +91,14 @@ class Comodidade(Base):
 
     imoveis: Mapped[List["Imovel"]] = relationship(secondary=imovel_comodidades, back_populates="comodidades")
 
+class solicitacoes(Base):
+    __tablename__ = "solicitacoes"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    usuario_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False)
+    imovel_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("imoveis.id", ondelete="CASCADE"), nullable=False)
+    data_solicitacao: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    status: Mapped[str] = mapped_column(Boolean, default=False)
+
+    imovel: Mapped["Imovel"] = relationship("Imovel")
+    solicitante: Mapped["Usuario"] = relationship("Usuario")

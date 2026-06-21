@@ -37,7 +37,10 @@ export default function Header() {
                             <Link className="nav-link text-white" to="/telaInicial">Inicio</Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link text-white" to="/telaCadastroImovel">Minhas Solicitações</Link>
+                            <Link className="nav-link text-white" to="/telaListarSolicitacoes">Minhas Solicitações</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link text-white" to="/telaMeusImoveis">Meus imoveis</Link>
                         </li>
                         <li className="nav-item">
                             <Link className="nav-link text-white" to="/">Logout</Link>
