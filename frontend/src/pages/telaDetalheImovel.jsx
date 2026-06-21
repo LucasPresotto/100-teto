@@ -4,7 +4,7 @@ import CardImovel from "../components/cardImovel";
 import { listarImoveis } from "../Services/Api";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { buscarImovel } from "../Services/Api";
+import { buscarImovel, solicitarImovel } from "../Services/Api";
 export default function TelaDetalhesImovel() {
 
     const navigate = useNavigate();
@@ -54,6 +54,7 @@ export default function TelaDetalhesImovel() {
         ? (imovel.fotos.find(f => f.is_principal)?.url_imagem || imovel.fotos[0].url_imagem)
         : "https://via.placeholder.com/1200x400?text=Sem+Fotografia";
 
+    
 
     return (
         <Layout>
@@ -67,22 +68,21 @@ export default function TelaDetalhesImovel() {
                 }}
 
             >
-                <div className="container-fluid p-0 bg-light min-vh-100">
-                
-                <div
-                    style={{
-                        height: "400px",
-                        backgroundImage: `url(${fotoCapa})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center"
-                    }}
-                ></div>
 
-                <div className="container" style={{ marginTop: "-80px", paddingBottom: "50px" }}>
-                    <div className="card shadow-lg border-0 rounded-4 p-4 p-md-5">
-                        
-                        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
-                            <div>
+
+                <div className="container" style={{ marginTop: "80px", paddingBottom: "60px" }}>
+                    <div className="card shadow-lg border-2 rounded-4 p-4 p-md-5" style={{ marginTop: "50px" }}>
+                        <div className=" d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                            <img
+                                src={fotoCapa}
+                                className="img-fluid rounded-3 shadow-sm w-50"
+                                alt={imovel.titulo}
+                                style={{
+                                    height: "250px",
+                                    objectFit: "cover",
+                                }}
+                            ></img>
+                            <div className="card-body d-flex flex-column justify-content-center align-items-start mt-4 mt-md-0">
                                 <span className="badge bg-secondary mb-2 text-uppercase px-3 py-2">{imovel.tipo}</span>
                                 <h1 className="fw-bold mb-1">{imovel.titulo}</h1>
                                 <p className="text-muted fs-5 mb-0"> {imovel.cidade} - CEP: {imovel.cep}</p>
@@ -154,10 +154,14 @@ export default function TelaDetalhesImovel() {
                                     </div>
                                 </div>
                             </div>
+                            <div className="col-12 mt-4">
+                                <button className="btn btn-primary w-100 py-3" onClick={() => solicitarImovel(imovel.id)} style={{ backgroundColor: '#05172c', borderColor: '#05172c' }}>
+                                    Solicitar imovel!
+                                </button>
+                            </div>
                         </div>
 
                     </div>
-                </div>
                 </div>
             </div>
 

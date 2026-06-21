@@ -1,0 +1,39 @@
+
+# Banco de dados Postgres
+psycopg2-binary>=2.9
+
+# Servidores WSGI/ASGI
+gunicorn>=20.1
+uvicorn>=0.23
+
+# Arquivos estáticos
+whitenoise>=6.5
+
+# Variáveis de ambiente
+python-dotenv>=1.0
+
+# Imagens e uploads
+Pillow>=10.0
+
+# CORS
+django-cors-headers>=4.0
+
+# Tarefas assíncronas (opcional)
+celery>=5.3
+redis>=5.0
+
+# Utilitários
+requests>=2.31
+sqlparse>=0.4
+
+# Testes
+pytest>=7.4
+pytest-django>=4.5
+coverage>=7.4
+
+# Autenticação/Usuários (opcional)
+djoser>=2.2
+
+# Segurança
+passlib>=1.7
+bcrypt>=4.01

@@ -2,7 +2,7 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../imagens/Logo100TETO.png"
 import { useNavigate } from "react-router-dom";
-import { cadastrarUsuario } from "../Services/Cadastrar.js";
+import { cadastrarUsuario } from "../Services/Api.js";
 
 export default function Cadastrar() {
     const [nome, setNome] = useState("");
@@ -49,7 +49,7 @@ export default function Cadastrar() {
         >
             <div
                 className="card shadow p-4"
-                style={{ width: "100%", maxWidth: "400px" }}
+                style={{ marginTop: "100px", width: "100%", maxWidth: "400px" }}
             >
                 <img
                     src={logo}

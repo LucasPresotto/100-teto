@@ -25,3 +25,9 @@ class ImovelCadastro(BaseModel):
 
 comodidades_ids: List[int] = []
 fotos: List[str] = []
+
+class SolicitacaoImovel(BaseModel):
+    imovel_id: str
+    usuario_id: str
+    status: bool
+    
