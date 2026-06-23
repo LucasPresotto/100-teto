@@ -23,8 +23,8 @@ class ImovelCadastro(BaseModel):
     cep: str
     cidade: str
 
-comodidades_ids: List[int] = []
-fotos: List[str] = []
+    comodidades_ids: List[int] = []
+    fotos: List[str] = []
 
 class SolicitacaoImovel(BaseModel):
     imovel_id: str

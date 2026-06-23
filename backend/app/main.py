@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 import shutil
 import json
+from pydantic import BaseModel
 
 Base.metadata.create_all(bind=engine)
 
@@ -233,19 +234,97 @@ def solicitar_imovel(imovel_id: str, db: Session = Depends(get_db), usuario: dic
     db.refresh(imovel)
     return {"mensagem": "Imóvel solicitado com sucesso!"}
 
+class RespostaSolicitacao(BaseModel):
+    acao: str
+
+@app.post("/solicitar_imovel/{imovel_id}")
+def solicitar_imovel(imovel_id: str, db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)):
+    imovel = db.query(Imovel).filter(Imovel.id == imovel_id).first()
+
+    if not imovel:
+        raise HTTPException(status_code=404, detail="Imóvel não encontrado")
+
+    if str(imovel.locador_id) == str(usuario["sub"]):
+        raise HTTPException(status_code=400, detail="Você não pode alugar o seu próprio imóvel!")
+    
+    solicitacao_existente = db.query(solicitacoes).filter_by(usuario_id=usuario["sub"], imovel_id=imovel_id, status=True).first()
+    
+    if solicitacao_existente:
+        raise HTTPException(status_code=400, detail="Você já solicitou este imóvel")
+
+    nova_solicitacao = solicitacoes(usuario_id=usuario["sub"], imovel_id=imovel_id, status=True)
+    imovel.solicitado = True    
+    
+    db.add(nova_solicitacao)
+    db.commit()
+    return {"mensagem": "Imóvel solicitado com sucesso!"}
+
 @app.get("/solicitacoes")
 def listar_solicitacoes(db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)):
     solicitacoes_usuario = db.query(solicitacoes).filter(solicitacoes.usuario_id == usuario["sub"]).all()
-    return [{
-            "id": s.imovel.id,
-            "titulo": s.imovel.titulo,
-            "descricao": s.imovel.descricao,
-            "preco_aluguel": s.imovel.preco_aluguel,
-            "cidade": s.imovel.cidade,
-            "fotos": s.imovel.fotos,
-        }
-        for s in solicitacoes_usuario
-    ]
+    resultado = []
+    for s in solicitacoes_usuario:
+        imovel = db.query(Imovel).filter(Imovel.id == s.imovel_id).first()
+        if imovel:
+            resultado.append({
+                "id": imovel.id,
+                "titulo": imovel.titulo,
+                "descricao": imovel.descricao,
+                "preco_aluguel": imovel.preco_aluguel,
+                "cidade": imovel.cidade,
+                "fotos": [{"url_imagem": f.url_imagem} for f in imovel.fotos],
+                "status_solicitacao": "Pendente" if s.status else "Aceita!"
+            })
+    return resultado
+
+@app.get("/solicitacoes/recebidas")
+def listar_solicitacoes_recebidas(db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)):
+    meus_imoveis_ids = [i.id for i in db.query(Imovel.id).filter(Imovel.locador_id == usuario["sub"]).all()]
+    
+    if not meus_imoveis_ids:
+        return []
+        
+    solicitacoes_recebidas = db.query(solicitacoes).filter(solicitacoes.imovel_id.in_(meus_imoveis_ids)).all()
+    
+    resultado = []
+    for s in solicitacoes_recebidas:
+        imovel = db.query(Imovel).filter(Imovel.id == s.imovel_id).first()
+        inquilino = db.query(Usuario).filter(Usuario.id == s.usuario_id).first()
+        
+        if imovel and inquilino:
+            resultado.append({
+                "imovel_id": imovel.id,
+                "imovel_titulo": imovel.titulo,
+                "usuario_id": inquilino.id,
+                "usuario_nome": inquilino.nome,
+                "usuario_email": inquilino.email,
+                "usuario_telefone": inquilino.telefone,
+                "status": "Pendente" if s.status else "Aceita"
+            })
+    return resultado
+
+@app.post("/solicitacoes/responder/{imovel_id}/{usuario_id}")
+def responder_solicitacao(imovel_id: str, usuario_id: str, resposta: RespostaSolicitacao, db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)):
+    imovel = db.query(Imovel).filter(Imovel.id == imovel_id, Imovel.locador_id == usuario["sub"]).first()
+    if not imovel:
+        raise HTTPException(status_code=403, detail="Acesso negado. Este imóvel não é seu.")
+
+    solicitacao = db.query(solicitacoes).filter_by(imovel_id=imovel_id, usuario_id=usuario_id).first()
+    if not solicitacao:
+        raise HTTPException(status_code=404, detail="Solicitação não encontrada")
+
+    if resposta.acao == "aceitar":
+        solicitacao.status = False 
+        db.commit()
+        return {"mensagem": "Solicitação Aceita! Entre em contato com o inquilino."}
+        
+    elif resposta.acao == "rejeitar":
+        db.delete(solicitacao) 
+        imovel.solicitado = False 
+        db.commit()
+        return {"mensagem": "Solicitação Rejeitada. O imóvel voltou ao mercado!"}
+    
+    raise HTTPException(status_code=400, detail="Ação inválida")
     
 @app.get("/meusImoveis/{id}")    
 def listar_meus_imoveis(id: str, db: Session = Depends(get_db), usuario: dict = Depends(usuario_autenticado)):
