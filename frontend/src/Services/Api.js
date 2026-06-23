@@ -73,7 +73,12 @@ export async function listarImoveis() {
 export async function buscarImovel(id) {
 
     const response = await fetch(
-        `http://localhost:8000/imoveis/${id}`
+        `http://localhost:8000/imoveis/${id}`,{
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
     );
 
     if (!response.ok) {
@@ -84,29 +89,26 @@ export async function buscarImovel(id) {
 }
 
 export async function solicitarImovel(id) {
-    console.log("Solicitando imóvel com ID:", id);
     const token = localStorage.getItem("token");
     if (!token) {
         throw new Error("Você precisa estar logado para solicitar um imóvel.");
         return;
     }
     try {
-        const response = await fetch(`http://localhost:8000/imoveis/${id}/solicitar`, {
+        const response = await fetch(`http://localhost:8000/solicitar_imovel/${id}`, {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
+                "Authorization": `Bearer ${token}`
             }
         });
         if (!response.ok) {
-            throw new Error("Erro ao solicitar imóvel");
+            const erro = await response.json();
+            throw new Error(erro.detail || "Erro ao solicitar imóvel");
         }
-        const data = await response.json();
-        console.log({ mensagem: "Solicitação enviada com sucesso!", tipo: "success" });
         alert("Solicitação enviada com sucesso!");
     } catch (err) {
         console.error("Erro ao solicitar imóvel:", err);
-        console.log({ mensagem: "Erro ao enviar solicitação.", tipo: "danger" });
+        alert(err.message);
     }
 }
 
@@ -114,13 +116,12 @@ export async function listarSolicitacoes() {
     const token = localStorage.getItem("token");
     if (!token) {
         throw new Error("Você precisa estar logado para ver suas solicitações.");
-        return;
     }
     const response = await fetch(
         "http://localhost:8000/solicitacoes",
         {
             headers: {
-                Authorization: token
+                "Authorization": `Bearer ${token}`
             }
         }
     );
@@ -129,6 +130,36 @@ export async function listarSolicitacoes() {
         throw new Error("Erro ao carregar solicitações");
     }
 
+    return response.json();
+}
+
+export async function listarSolicitacoesRecebidas() {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Você precisa estar logado");
+    
+    const response = await fetch(`http://localhost:8000/solicitacoes/recebidas`, {
+        headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    if (!response.ok) throw new Error("Erro ao carregar solicitações recebidas");
+    return response.json();
+}
+
+export async function responderSolicitacao(imovel_id, usuario_id, acao) {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://localhost:8000/solicitacoes/responder/${imovel_id}/${usuario_id}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ acao })
+    });
+
+    if (!response.ok) {
+        const erro = await response.json();
+        throw new Error(erro.detail || "Erro ao responder solicitação");
+    }
     return response.json();
 }
 

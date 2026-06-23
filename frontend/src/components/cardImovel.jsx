@@ -34,7 +34,7 @@ export default function CardImovel({ imovel }) {
                     {imovel.area_m2 && <span> {imovel.area_m2}m²</span>}
                 </div>
 
-                <button className="btn btn-primary w-100" onClick={navigate.bind(null, `/telaDetalhes/${imovel.id}`)}>
+                <button className="btn btn-primary w-100" onClick={() => navigate(`/telaDetalheImovel/${imovel.id}`)}>
                     Ver detalhes
                 </button>
             </div>
